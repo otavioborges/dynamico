@@ -9,11 +9,20 @@
 #define IPV4_H_
 
 #include <stdint.h>
+#include "eth.h"
 
-#define PACKET_IPv4_LENGTH	20
+#define PACKET_IPv4_LENGTH				20
 
-#define IPV4_IP_BROADCAST	0xFFFFFFFF
-#define IPV4_IP_ALL			0
+#define IPV4_IP_BROADCAST				0xFFFFFFFFU
+#define IPV4_IP_ALL						0
+
+#define ETH_ERROR_WRONG_IP_VERSION		-3
+#define ETH_ERROR_WRONG_DEST_IP			-4
+#define ETH_ERROR_PROT_NOT_SUPPORTED	-5
+
+#define IPV4_REPLY_TO_SENDER			0
+#define IPV4_REPLY_ON_BROADCAST_ALL		1
+#define IPV4_REPLY_ON_BROADCAST_SUBNET	1
 
 extern uint32_t IPV4_OWN_IP;
 
@@ -37,6 +46,8 @@ typedef struct{
 	uint32_t destAddr;
 }ipv4_header_t;
 
-void IPV4_DefineIP(uint8_t *ip);
+void IPV4_DefineIP(uint32_t ip);
+uint32_t IPV4_GetOwnIP(void);
+int IPV4_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply);
 
 #endif /* IPV4_H_ */

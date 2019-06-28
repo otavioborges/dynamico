@@ -12,8 +12,6 @@
 #define DHCP_MAX_NAME_LENGTH	64
 #define DHCP_OVERHEAD 			236
 
-#define REVERT_32_BITS(x)			(((x << 24) & 0xFF000000) | ((x << 8) & 0x00FF0000) | ((x >> 8) & 0x0000FF00) | ((x >> 24) & 0x000000FF))
-
 #include <stdint.h>
 
 typedef enum{

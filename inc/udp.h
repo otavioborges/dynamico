@@ -9,6 +9,7 @@
 #define UDP_H_
 
 #include <stdint.h>
+#include "ipv4.h"
 
 #define PACKET_UDP_LENGTH	8
 
@@ -20,6 +21,6 @@ typedef struct{
 	uint8_t options[40];
 }udp_header_t;
 
-int UDP_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply);
+int UDP_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply, uint32_t *replyOnBroadcast);
 
 #endif /* UDP_H_ */
