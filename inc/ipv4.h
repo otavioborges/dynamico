@@ -46,7 +46,7 @@ typedef struct{
 	uint32_t destAddr;
 }ipv4_header_t;
 
-void IPV4_DefineIP(uint32_t ip);
+void IPV4_DefineIP(uint32_t ip, uint32_t netmask);
 uint32_t IPV4_GetOwnIP(void);
 int IPV4_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply);
 
