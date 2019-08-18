@@ -5,11 +5,13 @@
  *      Author: root
  */
 
+#include "eth.h"
+#include "ipv4.h"
+
 #if(LOGGING == 1)
 #include <stdio.h>
 #endif
 #include <string.h>
-#include "eth.h"
 
 uint8_t ETH_MAC_BROADCAST[ETH_MAC_LENGTH] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 uint8_t ETH_OWN_MAC[ETH_MAC_LENGTH];
@@ -33,7 +35,7 @@ void ETH_GetOwnMAC(uint8_t *buffer){
 		buffer[idx] = ETH_OWN_MAC[idx];
 }
 
-#ifdef LOGGING
+#if(LOGGING == 1)
 void ETH_PrintMAC(uint8_t *mac, char *buffer){
 	// TODO: use no-lib approach
 	sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -51,7 +53,7 @@ int ETH_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply){
 	ethReply->etherType = eth->etherType;
 
 #if(LOGGING == 1)
-	char *sMAC[ETH_MAC_STR_LENGTH], dMAC[ETH_MAC_STR_LENGTH];
+	char sMAC[ETH_MAC_STR_LENGTH], dMAC[ETH_MAC_STR_LENGTH];
 	ETH_PrintMAC(eth->sourceMAC, sMAC);
 	ETH_PrintMAC(eth->destMAC, dMAC);
 	printf("DYNAMICO: Received packet from MAC \'%s\' to MAC \'%s\'\n", sMAC, dMAC);
@@ -69,7 +71,7 @@ int ETH_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply){
 
 		if(type == ETH_TYPE_IPV4){
 			// IPv4 header
-			responseLength = IPV4_ProcessPacket(msg, length, payload);
+			responseLength = IPV4_ProcessPacket(msg, length, eth->sourceMAC, payload);
 		}else if(type == ETH_TYPE_ARP){
 			responseLength = 0;	// TODO: implement ARP
 		}else if(type == ETH_TYPE_WOL){

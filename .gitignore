@@ -1,0 +1,6 @@
+# Don't include build folders
+build
+# Exclude Eclipse files
+.project
+.cproject
+.settings

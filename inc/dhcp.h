@@ -60,6 +60,6 @@ typedef struct{
 extern uint32_t g_serverAddr;
 
 void DHCP_Init(uint32_t network, uint32_t netmask, uint32_t initialRange, uint32_t endRange, uint32_t server);
-uint16_t DHCP_Parse(uint8_t *clientMAC, dhcp_header_t *msg, uint8_t *reply, uint32_t *broadcast);
+int DHCP_Parse(uint8_t *clientMAC, dhcp_header_t *msg, uint8_t *reply, uint32_t *broadcast);
 
 #endif /* DHCP_H_ */

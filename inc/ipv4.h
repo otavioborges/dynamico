@@ -48,6 +48,6 @@ typedef struct{
 
 void IPV4_DefineIP(uint32_t ip, uint32_t netmask);
 uint32_t IPV4_GetOwnIP(void);
-int IPV4_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply);
+int IPV4_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *sourceMAC, uint8_t *reply);
 
 #endif /* IPV4_H_ */

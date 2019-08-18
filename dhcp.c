@@ -269,7 +269,7 @@ void DHCP_Init(uint32_t network, uint32_t netmask, uint32_t initialRange, uint32
 	memset(g_usedRange, 0xFFFFFFFF, (sizeof(uint32_t) * DHCP_RANGE_BUFFER_LENGTH));
 }
 
-uint16_t DHCP_Parse(uint8_t *clientMAC, dhcp_header_t *msg, uint8_t *reply, uint32_t *broadcast){
+int DHCP_Parse(uint8_t *clientMAC, dhcp_header_t *msg, uint8_t *reply, uint32_t *broadcast){
 	uint32_t replyAddr = 0;
 
 	if(msg->flags & 0x8000) // reply on bradcast

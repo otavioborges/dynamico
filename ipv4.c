@@ -28,7 +28,7 @@ static uint32_t IPV4_CalculateSubnetBroadcast(void){
 	return IPV4_OWN_IP | ~IPV4_NETMASK;
 }
 
-int IPV4_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply){
+int IPV4_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *sourceMAC, uint8_t *reply){
 	ipv4_header_t *ipv4;
 	ipv4_header_t *replyIpv4;
 	uint8_t headerLength = 0;
@@ -60,7 +60,7 @@ int IPV4_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply){
 		length -= headerLength;
 
 		if(ipv4->protocol == IPv4_PROTOCOL_UDP){
-			responseLength = UDP_ProcessPacket(msg, length, payload, &replyOnBroadcast);
+			responseLength = UDP_ProcessPacket(msg, length, payload, sourceMAC, &replyOnBroadcast);
 		}else if(ipv4->protocol == IPv4_PROTOCOL_TCP){
 			responseLength = 0;	// TODO: implement TCP
 		}else{
