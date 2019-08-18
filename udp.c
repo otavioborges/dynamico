@@ -35,8 +35,8 @@ int UDP_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply, uint32_t *r
 
 	if(udp->destPort == DHCP_SERVER_PORT){
 		uint32_t replyOnBroadcast = 0;
-		replyLength = (int)DHCP_Parse(eth->sourceMAC, (dhcp_header_t *)payload,
-				(reply + PACKET_ETH_LENGTH + headerLength + PACKET_UDP_LENGTH), &replyOnBroadcast);
+		replyLength = (int)DHCP_Parse(udp->sourceMAC, (dhcp_header_t *)payload,
+				(reply + PACKET_UDP_LENGTH), &replyOnBroadcast);
 
 		if(replyLength == 0)
 			return 0;
