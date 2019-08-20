@@ -22,9 +22,13 @@ static uint32_t g_endRange = 0xff;
 static dhcp_lease_t g_leases[DHCP_RANGE_BUFFER_LENGTH];
 static uint32_t g_currentLeases = 0;
 
+static dhcp_callback_t g_callback = NULL;
+
 static uint16_t DHCP_request(dhcp_header_t *msg, uint8_t *reply, uint32_t * replyAddr){
 	uint32_t transactionID;
 	dhcp_option_t *option;
+	dhcp_lease_report_t report;
+	char clientName[64];
 
 	if(msg->hType != ADDR_TYPE_ETHERNET)
 		return 0;	// we only know how to deal with IEEE 802
@@ -39,12 +43,20 @@ static uint16_t DHCP_request(dhcp_header_t *msg, uint8_t *reply, uint32_t * repl
 	if(*payload != DHCP_MAGIC_COOKIE)
 		return 0;
 
+	option = (dhcp_option_t *)(msg->options + 4);
+	while(option->id != 0x0C)
+		option = (dhcp_option_t *)((&option->value) + option->length);
+
+	// save clients name
+	memcpy(clientName, &option->value, option->length);
+	clientName[option->length] = '\0';
+
 	// request or discovery?
 	option = (dhcp_option_t *)(msg->options + 4);
 	while(option->id != 0x35)
 		option = (dhcp_option_t *)((&option->value) + option->length);
 
-	if(option->value == 0x03){ // request
+	if(option->value == DHCP_OP_REQUEST){ // request
 		option = (dhcp_option_t *)(msg->options + 4);
 		while(option->id != 0x32)
 			option = (dhcp_option_t *)((&option->value) + option->length);
@@ -146,7 +158,7 @@ static uint16_t DHCP_request(dhcp_header_t *msg, uint8_t *reply, uint32_t * repl
 
 		*replyAddr = desiredIP;
 		return (DHCP_OVERHEAD + optionOffset);
-	}else if(option->value == 0x01){ // discover
+	}else if(option->value == DHCP_OP_DISCOVERY){ // discover
 		uint32_t probableIP = 0;
 		uint32_t lease = 0;
 		for(uint16_t leaseIdx = 0; leaseIdx < g_currentLeases; leaseIdx++){
@@ -166,10 +178,18 @@ static uint16_t DHCP_request(dhcp_header_t *msg, uint8_t *reply, uint32_t * repl
 			}
 
 			g_usedRange[g_currentLeases] = probableIP;
-			g_leases[g_currentLeases].ipAddr = probableIP;
+			g_leases[g_currentLeases].ipAddr = g_network + probableIP;
 			g_leases[g_currentLeases].issueTime = 0;
 			memcpy(g_leases[g_currentLeases].hwAddr, msg->cHAddr, 6);
+			strcpy(g_leases[g_currentLeases].name, clientName);
 			lease = g_currentLeases;
+
+			report.ip_lease = g_leases[lease].ipAddr;
+			memcpy(report.mac, msg->cHAddr, 6);
+			report.name = g_leases[lease].name;
+			if(g_callback != NULL)
+				g_callback(report);
+
 			g_currentLeases++;
 		}
 
@@ -269,6 +289,10 @@ void DHCP_Init(uint32_t network, uint32_t netmask, uint32_t initialRange, uint32
 	memset(g_usedRange, 0xFFFFFFFF, (sizeof(uint32_t) * DHCP_RANGE_BUFFER_LENGTH));
 }
 
+void DHCP_SetCallback(dhcp_callback_t callback){
+	g_callback = callback;
+}
+
 int DHCP_Parse(uint8_t *clientMAC, dhcp_header_t *msg, uint8_t *reply, uint32_t *broadcast){
 	uint32_t replyAddr = 0;
 
@@ -278,9 +302,9 @@ int DHCP_Parse(uint8_t *clientMAC, dhcp_header_t *msg, uint8_t *reply, uint32_t 
 		*broadcast = 0;
 
 	// treat the request
-	if(msg->op == 1){
+	if(msg->op == 0x01){
 		return DHCP_request(msg, reply, broadcast);
-	}else if(msg->op == 2){
+	}else if(msg->op == 0x02){
 		return DHCP_reply(msg, reply, broadcast);
 	}
 

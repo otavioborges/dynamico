@@ -26,6 +26,14 @@ typedef enum{
 	ADDR_TYPE_SERIAL_LINE	= 20
 }addr_type_t;
 
+typedef enum{
+	DHCP_OP_DISCOVERY	= 0x01,
+	DHCP_OP_OFFER		= 0x02,
+	DHCP_OP_REQUEST		= 0x03,
+	DHCP_OP_ACK			= 0x05,
+	DHCP_OP_NAC			= 0x06,
+}dhcp_op_t;
+
 typedef struct{
 	uint8_t op;
 	uint8_t hType;
@@ -45,6 +53,12 @@ typedef struct{
 }dhcp_header_t;
 
 typedef struct{
+	uint32_t ip_lease;
+	uint8_t mac[6];
+	char *name;
+}dhcp_lease_report_t;
+
+typedef struct{
 	uint32_t ipAddr;
 	uint32_t issueTime;
 	uint8_t hwAddr[6];
@@ -57,9 +71,12 @@ typedef struct{
 	uint8_t value;
 }dhcp_option_t;
 
+typedef void (*dhcp_callback_t)(dhcp_lease_report_t report);
+
 extern uint32_t g_serverAddr;
 
 void DHCP_Init(uint32_t network, uint32_t netmask, uint32_t initialRange, uint32_t endRange, uint32_t server);
+void DHCP_SetCallback(dhcp_callback_t callback);
 int DHCP_Parse(uint8_t *clientMAC, dhcp_header_t *msg, uint8_t *reply, uint32_t *broadcast);
 
 #endif /* DHCP_H_ */
