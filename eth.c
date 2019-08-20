@@ -8,13 +8,12 @@
 #include "eth.h"
 #include "ipv4.h"
 
-#if(LOGGING == 1)
 #include <stdio.h>
-#endif
 #include <string.h>
 
 uint8_t ETH_MAC_BROADCAST[ETH_MAC_LENGTH] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 uint8_t ETH_OWN_MAC[ETH_MAC_LENGTH];
+uint8_t ETH_RESP_MAC[ETH_MAC_LENGTH];
 
 uint8_t ETH_MatchMAC(uint8_t *source, const uint8_t *dest){
 	for(uint8_t idx = 0; idx < ETH_MAC_LENGTH; idx++){
@@ -35,12 +34,14 @@ void ETH_GetOwnMAC(uint8_t *buffer){
 		buffer[idx] = ETH_OWN_MAC[idx];
 }
 
-#if(LOGGING == 1)
+void ETH_GetResponseMAC(uint8_t *mac){
+	memcpy(mac, ETH_RESP_MAC, 6);
+}
+
 void ETH_PrintMAC(uint8_t *mac, char *buffer){
 	// TODO: use no-lib approach
 	sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
-#endif
 
 int ETH_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply){
 	eth_header_t *eth = (eth_header_t *)msg;
@@ -51,6 +52,8 @@ int ETH_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply){
 	memcpy(ethReply->destMAC, eth->sourceMAC, 6);
 	memcpy(ethReply->sourceMAC, eth->destMAC, 6);
 	ethReply->etherType = eth->etherType;
+
+	memcpy(ETH_RESP_MAC, eth->sourceMAC, 6);
 
 #if(LOGGING == 1)
 	char sMAC[ETH_MAC_STR_LENGTH], dMAC[ETH_MAC_STR_LENGTH];

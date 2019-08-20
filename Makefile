@@ -8,7 +8,7 @@ AR?=ar
 ifeq ($(ARCH),arm)
 	C_FLAGS = -mcpu=cortex-m7 -mthumb -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -c -fPIC
 else
-	C_FLAGS = -c -fPIC -g3
+	C_FLAGS = -c -fPIC -g3 -DLOGGING=0
 endif
 
 ifeq ($(ARCH),arm)

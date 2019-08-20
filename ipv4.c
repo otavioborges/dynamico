@@ -7,6 +7,7 @@
 
 #include "ipv4.h"
 #include "udp.h"
+#include <stdio.h>
 
 uint32_t IPV4_OWN_IP	= 0;
 uint32_t IPV4_NETMASK	= 0;
@@ -30,7 +31,7 @@ static uint32_t IPV4_CalculateSubnetBroadcast(void){
 
 int IPV4_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *sourceMAC, uint8_t *reply){
 	ipv4_header_t *ipv4;
-	ipv4_header_t *replyIpv4;
+	ipv4_header_t *replyIpv4 = (ipv4_header_t *)reply;
 	uint8_t headerLength = 0;
 
 	ipv4 = (ipv4_header_t *)msg;
@@ -85,4 +86,38 @@ int IPV4_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *sourceMAC, uint8_
 	}else{
 		return ETH_ERROR_WRONG_DEST_IP;
 	}
+}
+
+void IPV4_PrintIP(uint32_t address, char *buffer){
+	uint8_t token = (uint8_t)(address & 0xFF);
+	char octet[4];
+
+	sprintf(buffer, "%d.%d.%d.%d", ((uint8_t)(address & 0xFF)),((uint8_t)((address >> 8) & 0xFF)),
+			((uint8_t)((address >> 16) & 0xFF)),((uint8_t)((address >> 24) & 0xFF)));
+}
+
+uint32_t IPV4_atoi(char *ip){
+	uint32_t response = 0;
+	uint32_t token = 0;
+	uint32_t idx = 0;
+
+	while(ip[idx] != '\0' && idx < 256){
+		if(ip[idx] == '.'){
+			response += token;
+			token = 0;
+			response = response << 8;
+		}else if((ip[idx] >= '0') && (ip[idx] <= '9')){
+			token *= 10;
+			token += (ip[idx] - '0');
+		}else{
+			return 0;
+		}
+
+		idx++;
+	}
+
+	if(token != 0)
+		response += token;
+
+	return response;
 }

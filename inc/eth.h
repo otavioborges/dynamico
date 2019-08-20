@@ -37,9 +37,8 @@ typedef struct{
 uint8_t ETH_MatchMAC(uint8_t *source, const uint8_t *dest);
 void ETH_DefineMAC(uint8_t *value);
 void ETH_GetOwnMAC(uint8_t *buffer);
-#ifdef LOGGING
+void ETH_GetResponseMAC(uint8_t *mac);
 void ETH_PrintMAC(uint8_t *mac, char *buffer);
-#endif
 
 int ETH_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply);
 
