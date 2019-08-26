@@ -44,17 +44,30 @@ static uint16_t DHCP_request(dhcp_header_t *msg, uint8_t *reply, uint32_t * repl
 		return 0;
 
 	option = (dhcp_option_t *)(msg->options + 4);
-	while(option->id != 0x0C)
+	while(option->id != 0x0C){
 		option = (dhcp_option_t *)((&option->value) + option->length);
+		if(option->id == 0xFF)
+			break;
+	}
 
 	// save clients name
-	memcpy(clientName, &option->value, option->length);
-	clientName[option->length] = '\0';
+	if(option->id == 0x0C){
+		memcpy(clientName, &option->value, option->length);
+		clientName[option->length] = '\0';
+	}else{
+		clientName[0] = '\0';
+	}
 
 	// request or discovery?
 	option = (dhcp_option_t *)(msg->options + 4);
-	while(option->id != 0x35)
+	while(option->id != 0x35){
 		option = (dhcp_option_t *)((&option->value) + option->length);
+		if(option->id == 0xFF)
+			break;
+	}
+
+	if(option->id == 0xFF)
+		return 0;
 
 	if(option->value == DHCP_OP_REQUEST){ // request
 		option = (dhcp_option_t *)(msg->options + 4);
@@ -266,7 +279,7 @@ static uint16_t DHCP_request(dhcp_header_t *msg, uint8_t *reply, uint32_t * repl
 		optionOffset++;
 
 		if(*replyAddr == 0)
-			*replyAddr = probableIP;
+			*replyAddr = g_leases[lease].ipAddr;
 
 		return (DHCP_OVERHEAD + optionOffset);
 	}

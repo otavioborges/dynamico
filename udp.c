@@ -28,6 +28,7 @@ int UDP_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply, uint8_t *so
 	replyUdp->sourcePort = udp->destPort;
 	replyUdp->destPort = udp->sourcePort;
 	replyUdp->checksum = 0;
+	replyUdp->length = udp->length;
 
 	uint8_t *payload = (reply + PACKET_UDP_LENGTH);
 	int responseLength = 0;
@@ -40,6 +41,7 @@ int UDP_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply, uint8_t *so
 		if(replyLength == 0)
 			return 0;
 
+		replyUdp->length = REVERT_16BITS((replyLength + PACKET_UDP_LENGTH));
 		return (replyLength + PACKET_UDP_LENGTH);
 	}
 
