@@ -7,13 +7,14 @@
 
 #include "eth.h"
 #include "ipv4.h"
+#include "arp.h"
 
 #include <stdio.h>
 #include <string.h>
 
-uint8_t ETH_MAC_BROADCAST[ETH_MAC_LENGTH] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-uint8_t ETH_OWN_MAC[ETH_MAC_LENGTH];
-uint8_t ETH_RESP_MAC[ETH_MAC_LENGTH];
+static uint8_t ETH_MAC_BROADCAST[ETH_MAC_LENGTH] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+static uint8_t ETH_OWN_MAC[ETH_MAC_LENGTH];
+static uint8_t ETH_RESP_MAC[ETH_MAC_LENGTH];
 
 uint8_t ETH_MatchMAC(uint8_t *source, const uint8_t *dest){
 	for(uint8_t idx = 0; idx < ETH_MAC_LENGTH; idx++){
@@ -29,9 +30,8 @@ void ETH_DefineMAC(uint8_t *value){
 		ETH_OWN_MAC[idx] = value[idx];
 }
 
-void ETH_GetOwnMAC(uint8_t *buffer){
-	for(uint8_t idx = 0; idx < ETH_MAC_LENGTH; idx++)
-		buffer[idx] = ETH_OWN_MAC[idx];
+uint8_t * ETH_GetOwnMAC(void){
+	return ETH_OWN_MAC;
 }
 
 void ETH_GetResponseMAC(uint8_t *mac){
@@ -50,7 +50,7 @@ int ETH_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply){
 	uint16_t type = REVERT_16BITS(eth->etherType);
 
 	memcpy(ethReply->destMAC, eth->sourceMAC, 6);
-	memcpy(ethReply->sourceMAC, eth->destMAC, 6);
+	memcpy(ethReply->sourceMAC, ETH_OWN_MAC, 6);
 	ethReply->etherType = eth->etherType;
 
 	memcpy(ETH_RESP_MAC, eth->sourceMAC, 6);
@@ -76,19 +76,29 @@ int ETH_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *reply){
 			// IPv4 header
 			responseLength = IPV4_ProcessPacket(msg, length, eth->sourceMAC, payload);
 		}else if(type == ETH_TYPE_ARP){
-			responseLength = 0;	// TODO: implement ARP
+			responseLength = ARP_ProcessPacket(msg, length, payload);
 		}else if(type == ETH_TYPE_WOL){
-			responseLength = 0;	// TODO: implement WOL
+			return 0;
 		}else{
 			return ETH_ERROR_TYPE_NOT_SUPPORTED;
 		}
 
-		if(responseLength == 0)
-			return 0;
+		if(responseLength <= 0)
+			return responseLength;
 		else
 			return (responseLength + PACKET_ETH_LENGTH);
 	}else{
 		// packet not for us!
 		return ETH_ERROR_WRONG_DEST_MAC;
 	}
+}
+
+int ETH_CreateHeader(uint8_t *buffer, uint8_t *destination, eth_type_t type){
+	eth_header_t *reply = (eth_header_t *)buffer;
+
+	memcpy(reply->destMAC, destination, 6);
+	memcpy(reply->sourceMAC, ETH_OWN_MAC, 6);
+	reply->etherType = REVERT_16BITS(type);
+
+	return PACKET_ETH_LENGTH;
 }
