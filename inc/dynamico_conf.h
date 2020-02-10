@@ -24,4 +24,8 @@
 #define DYN_CONF_USE_SMALL_STRING_LIB	0
 #endif
 
+#ifndef DYN_CONF_DHCP_CLIENT
+#define DYN_CONF_DHCP_CLIENT			1
+#endif
+
 #endif /* INC_DYNAMICO_CONF_H_ */

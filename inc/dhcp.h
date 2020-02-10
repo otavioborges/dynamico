@@ -9,6 +9,7 @@
 #define DHCP_H_
 
 #define DHCP_SERVER_PORT		0x4300
+#define DHCP_CLIENT_PORT		0x4400
 #define DHCP_MAX_NAME_LENGTH	64
 #define DHCP_OVERHEAD 			236
 
@@ -32,6 +33,7 @@ typedef enum{
 	DHCP_OP_REQUEST		= 0x03,
 	DHCP_OP_ACK			= 0x05,
 	DHCP_OP_NAC			= 0x06,
+	DHCP_OP_INVALID		= 0xFF
 }dhcp_op_t;
 
 typedef struct{
@@ -78,5 +80,6 @@ extern uint32_t g_serverAddr;
 void DHCP_Init(uint32_t network, uint32_t netmask, uint32_t initialRange, uint32_t endRange, uint32_t server);
 void DHCP_SetCallback(dhcp_callback_t callback);
 int DHCP_Parse(uint8_t *clientMAC, dhcp_header_t *msg, uint8_t *reply, uint32_t *broadcast);
+void DHCP_RequestIP(uint8_t *resultMsg, uint32_t *length);
 
 #endif /* DHCP_H_ */
