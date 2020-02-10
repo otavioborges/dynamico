@@ -24,7 +24,7 @@
 #define IPV4_REPLY_ON_BROADCAST_ALL		1
 #define IPV4_REPLY_ON_BROADCAST_SUBNET	1
 
-extern uint32_t IPV4_OWN_IP;
+//extern uint32_t IPV4_OWN_IP;
 
 typedef enum{
 	IPv4_PROTOCOL_ICMP	= 1,
@@ -46,10 +46,21 @@ typedef struct{
 	uint32_t destAddr;
 }ipv4_header_t;
 
-void IPV4_DefineIP(uint32_t ip, uint32_t netmask);
+typedef struct{
+	uint8_t mac[6];
+	uint32_t ip;
+}ipv4_host_t;
+
+void IPV4_DefineIP(uint32_t ip, uint32_t netmask, uint32_t gateway);
 uint32_t IPV4_GetOwnIP(void);
+uint32_t IPV4_GetNetmask(void);
+uint32_t IPV4_GetGateway(void);
 int IPV4_ProcessPacket(uint8_t *msg, uint16_t length, uint8_t *sourceMAC, uint8_t *reply);
 void IPV4_PrintIP(uint32_t address, char *buffer);
 uint32_t IPV4_atoi(char *ip);
+void IPV4_AddHost(uint8_t *mac, uint32_t ip);
+uint8_t IPV4_HasHost(uint32_t ip);
+int IPV4_GetHeader(uint8_t *payload, uint32_t dataLength, uint32_t destination, ipv4_protocol_t protocol);
+uint8_t *IPV4_GetMAC(uint32_t ip);
 
 #endif /* IPV4_H_ */
