@@ -6,13 +6,13 @@ CPP?=g++
 AR?=ar
 
 ifeq ($(ARCH),arm)
-	C_FLAGS = -mcpu=cortex-m7 -mthumb -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -c -fPIC
+	C_FLAGS = -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16 -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -c -fPIC -g3
 else
 	C_FLAGS = -c -fPIC -g3 -DLOGGING=0
 endif
 
 ifeq ($(ARCH),arm)
-	COMP = $(CC)
+	COMP = gcc
 else
 	COMP = g++
 endif
